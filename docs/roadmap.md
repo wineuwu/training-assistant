@@ -1,8 +1,8 @@
 # Training & Competition Assistant 開發路線圖
 
 依 `project-prompt.md` 的階段切成一串 SDD 提案。一次只進行一個提案,
-每個提案在 `/Users/winnie/黑豹HF/sdd/<短名>/` 有自己的 規格.md 與 任務.md;
-完成後歸檔至 `sdd/archive/`。
+每個提案在 `docs/sdd/<短名>/` 有自己的 規格.md 與 任務.md;
+完成後歸檔至 `docs/sdd/archive/`。
 
 | # | 提案短名 | 對應 prompt 章節 | 範圍一句話 | 狀態 |
 |---|---|---|---|---|
