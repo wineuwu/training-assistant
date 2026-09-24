@@ -6,7 +6,7 @@
 
 | # | 提案短名 | 對應 prompt 章節 | 範圍一句話 | 狀態 |
 |---|---|---|---|---|
-| 1 | `project-setup` | §21 | 目錄、Git、venv、pnpm、Vue + Vite 與 FastAPI 空專案,能各自跑起來 | 未開始 |
+| 1 | `project-setup` | §21 | 目錄、Git、venv、pnpm、Vue + Vite 與 FastAPI 空專案,能各自跑起來 | 已完成 |
 | 2 | `training-api-inmemory` | §7 | 五支 Training API,資料先放記憶體 list,不接 DB | 未開始 |
 | 3 | `training-postgres` | §7 | 接 PostgreSQL + SQLAlchemy,取代記憶體 list | 未開始 |
 | 4 | `training-frontend` | §7 | Vue 呼叫 API 完成 Training CRUD 畫面 | 未開始 |
@@ -16,7 +16,7 @@
 | 8 | `docker-compose` | §11 | `docker compose up` 啟動 frontend、backend、postgres | 未開始 |
 | 9 | `deployment` | §12 | CI/CD、Server、Domain、HTTPS(進行時可能再拆) | 未開始 |
 | 10 | `agent-query` | §13 第一、二階段 | Agent 只讀:查訓練、查準備狀況 | 未開始 |
-| 11 | `agent-plan` | §13 第三階段 | Agent 產生 Training Plan 並透過 API 寫入 | 未開始 |
+| 11 | `agent-plan` | §13 第三階段 | Agent 讀過往訓練與教練課表,產生 Training Plan 並透過 API 寫入 | 未開始 |
 | 12 | `training-planner-skill` | §14 | Skill / Harness 規則限制 Agent 行為 | 未開始 |
 | 13 | `agent-eval` | §15 | 測試案例,比較 With / Without Skill | 未開始 |
 
