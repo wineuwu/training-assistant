@@ -7,7 +7,7 @@
 | # | 提案短名 | 對應 prompt 章節 | 範圍一句話 | 狀態 |
 |---|---|---|---|---|
 | 1 | `project-setup` | §21 | 目錄、Git、venv、pnpm、Vue + Vite 與 FastAPI 空專案,能各自跑起來 | 已完成 |
-| 2 | `training-api-inmemory` | §7 | 五支 Training API,資料先放記憶體 list,不接 DB | 未開始 |
+| 2 | `training-api-inmemory` | §7 | 五支 Training API,資料先放記憶體 list,不接 DB | 已完成 |
 | 3 | `training-postgres` | §7 | 接 PostgreSQL + SQLAlchemy,取代記憶體 list | 未開始 |
 | 4 | `training-frontend` | §7 | Vue 呼叫 API 完成 Training CRUD 畫面 | 未開始 |
 | 5 | `competition-event` | §8 | Competition 與 Event 的 API 與畫面 | 未開始 |
