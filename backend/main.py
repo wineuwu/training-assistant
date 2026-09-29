@@ -90,3 +90,13 @@ def get_training(training_id: int):
         if training.id == training_id:
             return training
     raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")
+
+
+@app.put("/trainings/{training_id}", response_model=Training)
+def update_trainings(training_id: int, payload: TrainingCreate):
+    for idx, training in enumerate(trainings):
+        if training.id == training_id:
+            trainings[idx] = Training(id=training_id, **payload.model_dump())
+            return trainings[idx]
+
+    raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")

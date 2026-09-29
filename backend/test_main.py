@@ -114,3 +114,25 @@ def test_get_trainings():
 
     assert training.status_code == 200
     assert training.json()["id"] == 1
+
+
+def test_update_training():
+    post1 = client.post(
+        "/trainings", json={"date": "2026-03-26", "type": "running", "duration": 40}
+    )
+
+    assert post1.status_code == 201
+
+    put_id_1 = client.put(
+        "/trainings/1", json={"date": "2026-03-26", "type": "running", "duration": 60}
+    )
+    assert put_id_1.status_code == 200
+    assert put_id_1.json()["duration"] == 60
+    assert put_id_1.json()["id"] == 1
+
+
+def test_update_not_found():
+    res = client.put(
+        "/trainings/999", json={"date": "2026-03-26", "type": "running", "duration": 40}
+    )
+    assert res.status_code == 404
