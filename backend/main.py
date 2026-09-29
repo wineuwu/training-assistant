@@ -100,3 +100,12 @@ def update_trainings(training_id: int, payload: TrainingCreate):
             return trainings[idx]
 
     raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")
+
+
+@app.delete("/trainings/{training_id}", status_code=204)
+def delete_training(training_id: int):
+    for idx, training in enumerate(trainings):
+        if training.id == training_id:
+            del trainings[idx]
+            return
+    raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")

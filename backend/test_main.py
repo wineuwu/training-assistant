@@ -1,9 +1,8 @@
+import main
 import pytest
 from fastapi.testclient import TestClient
-from pydantic import ValidationError
-
-import main
 from main import TrainingCreate, app
+from pydantic import ValidationError
 
 client = TestClient(app)
 
@@ -135,4 +134,22 @@ def test_update_not_found():
     res = client.put(
         "/trainings/999", json={"date": "2026-03-26", "type": "running", "duration": 40}
     )
+    assert res.status_code == 404
+
+
+def test_delete_training():
+    client.post(
+        "/trainings", json={"date": "2026-03-26", "type": "running", "duration": 40}
+    )
+
+    client.delete("/trainings/1")
+    res = client.get("/trainings/1")
+
+    assert res.status_code == 404
+
+
+def test_delete_not_found():
+
+    res = client.delete("/trainings/999")
+
     assert res.status_code == 404
