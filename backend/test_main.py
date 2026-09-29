@@ -73,3 +73,44 @@ def test_id_increments():
     assert post1.json()["id"] == 1
     assert post2.status_code == 201
     assert post2.json()["id"] == 2
+
+
+def test_list_trainings():
+    post_training = client.post(
+        "/trainings",
+        json={"date": "2026-03-26", "type": "running", "duration": 40},
+    )
+
+    assert post_training.status_code == 201
+
+    response = client.get("/trainings")
+    d = response.json()
+    assert len(d) == 1
+
+
+def test_get_training_not_found():
+
+    post_training = client.post(
+        "/trainings",
+        json={"date": "2026-03-26", "type": "running", "duration": 40},
+    )
+
+    assert post_training.status_code == 201
+
+    training_list = client.get("/trainings/3")
+
+    assert training_list.status_code == 404
+
+
+def test_get_trainings():
+    post_training = client.post(
+        "/trainings",
+        json={"date": "2026-03-26", "type": "running", "duration": 40},
+    )
+
+    assert post_training.status_code == 201
+
+    training = client.get("/trainings/1")
+
+    assert training.status_code == 200
+    assert training.json()["id"] == 1

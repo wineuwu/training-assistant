@@ -1,7 +1,7 @@
 from datetime import date
 from enum import Enum
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, model_validator
 
 
@@ -77,3 +77,16 @@ def create_training(payload: TrainingCreate):
     next_id += 1
     trainings.append(record)
     return record
+
+
+@app.get("/trainings", response_model=list[Training])
+def list_training():
+    return trainings
+
+
+@app.get("/trainings/{training_id}", response_model=Training)
+def get_training(training_id: int):
+    for training in trainings:
+        if training.id == training_id:
+            return training
+    raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")
