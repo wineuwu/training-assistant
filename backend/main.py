@@ -30,7 +30,7 @@ NEEDS_MENU_ITEMS = {
 }
 
 
-class Training(BaseModel):
+class TrainingCreate(BaseModel):
     date: date
     type: TrainingType
     duration: int
@@ -54,9 +54,26 @@ class Training(BaseModel):
         return self
 
 
+class Training(TrainingCreate):
+    id: int
+
+
+trainings: list[Training] = []
+next_id = 1
+
+
 app = FastAPI()
 
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.post("/trainings", status_code=201, response_model=Training)
+def create_training(payload: TrainingCreate):
+    global next_id
+    record = Training(id=next_id, **payload.model_dump())
+    next_id += 1
+    trainings.append(record)
+    return record
