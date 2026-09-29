@@ -1,6 +1,111 @@
-def main():
-    print("Hello from backend!")
+from datetime import date
+from enum import Enum
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, model_validator
 
 
-if __name__ == "__main__":
-    main()
+class TrainingType(str, Enum):
+    badminton = "badminton"
+    running = "running"
+    hiit = "hiit"
+    emom = "emom"
+    strength = "strength"
+    mixed = "mixed"
+
+
+class Effort(str, Enum):
+    almost_die = "almost_die"
+    very_hard = "very_hard"
+    hard = "hard"
+    normal = "normal"
+    easy = "easy"
+
+
+NEEDS_MENU_ITEMS = {
+    TrainingType.hiit,
+    TrainingType.emom,
+    TrainingType.strength,
+    TrainingType.mixed,
+}
+
+
+class TrainingCreate(BaseModel):
+    date: date
+    type: TrainingType
+    duration: int
+    menu: str | None = None
+    distance: float | None = None
+    average_heart_rate: int | None = None
+    effort: Effort | None = None
+    note: str | None = None
+
+    @model_validator(mode="after")
+    def validate_menu(self):
+
+        needs_menu = self.type in NEEDS_MENU_ITEMS
+        has_menu = bool(self.menu)
+
+        if needs_menu and not has_menu:
+            raise ValueError(f"{self.type.value} 需要填寫今日訓練菜單")
+        if not needs_menu and has_menu:
+            raise ValueError(f"{self.type.value} 不需要填寫今日訓練菜單")
+
+        return self
+
+
+class Training(TrainingCreate):
+    id: int
+
+
+trainings: list[Training] = []
+next_id = 1
+
+
+app = FastAPI()
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.post("/trainings", status_code=201, response_model=Training)
+def create_training(payload: TrainingCreate):
+    global next_id
+    record = Training(id=next_id, **payload.model_dump())
+    next_id += 1
+    trainings.append(record)
+    return record
+
+
+@app.get("/trainings", response_model=list[Training])
+def list_training():
+    return trainings
+
+
+@app.get("/trainings/{training_id}", response_model=Training)
+def get_training(training_id: int):
+    for training in trainings:
+        if training.id == training_id:
+            return training
+    raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")
+
+
+@app.put("/trainings/{training_id}", response_model=Training)
+def update_trainings(training_id: int, payload: TrainingCreate):
+    for idx, training in enumerate(trainings):
+        if training.id == training_id:
+            trainings[idx] = Training(id=training_id, **payload.model_dump())
+            return trainings[idx]
+
+    raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")
+
+
+@app.delete("/trainings/{training_id}", status_code=204)
+def delete_training(training_id: int):
+    for idx, training in enumerate(trainings):
+        if training.id == training_id:
+            del trainings[idx]
+            return
+    raise HTTPException(status_code=404, detail="找不到相關訓練紀錄")
