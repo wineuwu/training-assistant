@@ -19,6 +19,8 @@
 | 11 | `agent-plan` | §13 第三階段 | Agent 讀過往訓練與教練課表,產生 Training Plan 並透過 API 寫入 | 未開始 |
 | 12 | `training-planner-skill` | §14 | Skill / Harness 規則限制 Agent 行為 | 未開始 |
 | 13 | `agent-eval` | §15 | 測試案例,比較 With / Without Skill | 未開始 |
+| 14 | `ci-ai-review` | — | 開 PR 時由 GitHub Actions 呼叫 Gemini 做 code review 並留言,不需 server | 進行中 |
+| 15 | `ai-review-bot` | — | 把 AI code review 從 Actions 改成常駐 bot(接 webhook),排在 deployment 與 agent 階段之後 | 未開始 |
 
 ## 切法原則
 
