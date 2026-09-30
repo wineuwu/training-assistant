@@ -31,7 +31,7 @@ jobs:
       - name: 呼叫 Gemini 審查
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_MODEL: gemini-2.5-flash
+          GEMINI_MODEL: gemini-3.1-flash-lite
           IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
           BASE: ${{ steps.range.outputs.base }}
           HEAD: ${{ steps.range.outputs.head }}
