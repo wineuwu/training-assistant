@@ -28,8 +28,11 @@ jobs:
           echo "base=$BASE" >> "$GITHUB_OUTPUT"
           echo "head=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
 
-      - name: 印出 PR 編號與 diff 行數
-        run: |
-          echo "PR #${{ github.event.pull_request.number }}"
-          echo "範圍: ${{ steps.range.outputs.base }}...${{ steps.range.outputs.head }}"
-          git diff "${{ steps.range.outputs.base }}...${{ steps.range.outputs.head }}" | wc -l
+      - name: 呼叫 Gemini 審查
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-flash
+          IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
+          BASE: ${{ steps.range.outputs.base }}
+          HEAD: ${{ steps.range.outputs.head }}
+        run: python3 .github/scripts/review.py
