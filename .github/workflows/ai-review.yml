@@ -1,0 +1,35 @@
+name: AI Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [master]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 決定要審的 diff 範圍
+        id: range
+        run: |
+          if [ "${{ github.event.action }}" = "synchronize" ]; then
+            BASE="${{ github.event.before }}"
+          else
+            BASE="${{ github.event.pull_request.base.sha }}"
+          fi
+          echo "base=$BASE" >> "$GITHUB_OUTPUT"
+          echo "head=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+
+      - name: 印出 PR 編號與 diff 行數
+        run: |
+          echo "PR #${{ github.event.pull_request.number }}"
+          echo "範圍: ${{ steps.range.outputs.base }}...${{ steps.range.outputs.head }}"
+          git diff "${{ steps.range.outputs.base }}...${{ steps.range.outputs.head }}" | wc -l
