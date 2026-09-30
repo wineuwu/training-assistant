@@ -5,6 +5,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
@@ -13,6 +14,10 @@ import urllib.request
 GEMINI_URL = (
     "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 )
+
+BOT_LOGIN = "github-actions[bot]"
+MARKER_PATTERN = re.compile(r"<!-- ai-review:sha=([0-9a-f]{40}) -->")
+REVIEW_FILE = "review.md"
 
 PROMPT = """你是資深全端工程師，請用繁體中文 review 下面這份 git diff。只列出可行動的問題，並標明檔案與行；沒有問題就回答「Review 完畢，沒有發現問題」。"""
 
@@ -28,6 +33,28 @@ def truncate_diff(diff: str, max_bytes: int) -> tuple[str, bool]:
 
 def extract_text(res: dict) -> str:
     return res["candidates"][0]["content"]["parts"][0]["text"]
+
+
+def find_last_sha(comments: list[dict]) -> str | None:
+    """從最新的 bot 留言裡找上次審到的 commit；別人的留言一律不信。"""
+    for comment in reversed(comments):
+        if comment["login"] != BOT_LOGIN:
+            continue
+        match = MARKER_PATTERN.search(comment["body"])
+        if match:
+            return match.group(1)
+    return None
+
+
+def commit_exists(sha: str) -> bool:
+    result = subprocess.run(["git", "cat-file", "-e", f"{sha}^{{commit}}"], capture_output=True, check=False)
+    return result.returncode == 0
+
+
+def load_comments(path: str) -> list[dict]:
+    # gh --jq 輸出的是一行一個 JSON 物件
+    with open(path, encoding="utf-8") as file:
+        return [json.loads(line) for line in file if line.strip()]
 
 
 def call_review_agent(prompt: str, api_key: str, model: str) -> str:
@@ -46,7 +73,15 @@ def main() -> int:
         print("fork 的 PR 拿不到 Secrets，略過審查")
         return 0
 
-    base, head = os.environ["BASE"], os.environ["HEAD"]
+    head = os.environ["HEAD"]
+    base = find_last_sha(load_comments(os.environ["COMMENTS_FILE"]))
+    if base and not commit_exists(base):
+        print("上次審查的 commit 已不存在（force-push），改審整個 PR")
+        base = None
+    if base == head:
+        print("這個 commit 已經審過，略過審查")
+        return 0
+    base = base or os.environ["PR_BASE"]
     max_bytes = int(os.environ.get("MAX_DIFF_BYTES", "100000"))
     print(f"審查範圍: {base}...{head}")
 
@@ -74,6 +109,9 @@ def main() -> int:
 
     print("===== Gemini review =====")
     print(review)
+
+    with open(REVIEW_FILE, "w", encoding="utf-8") as file:
+        file.write(f"{review}\n\n<!-- ai-review:sha={head} -->\n")
     return 0
 
 

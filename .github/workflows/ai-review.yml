@@ -17,22 +17,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 決定要審的 diff 範圍
-        id: range
+      - name: 抓這個 PR 的所有留言
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ github.event.action }}" = "synchronize" ]; then
-            BASE="${{ github.event.before }}"
-          else
-            BASE="${{ github.event.pull_request.base.sha }}"
-          fi
-          echo "base=$BASE" >> "$GITHUB_OUTPUT"
-          echo "head=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+          gh api --paginate \
+            "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            --jq '.[] | {login: .user.login, body: .body}' > comments.jsonl
 
       - name: 呼叫 Gemini 審查
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: gemini-3.1-flash-lite
           IS_FORK: ${{ github.event.pull_request.head.repo.fork }}
-          BASE: ${{ steps.range.outputs.base }}
-          HEAD: ${{ steps.range.outputs.head }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          COMMENTS_FILE: comments.jsonl
         run: python3 .github/scripts/review.py
+
+      - name: 貼出 review 留言
+        if: hashFiles('review.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh pr comment "${{ github.event.pull_request.number }}" --body-file review.md
